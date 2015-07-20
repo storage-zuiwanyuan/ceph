@@ -1750,6 +1750,8 @@ int AsyncConnection::handle_connect_msg(ceph_msg_connect &connect, bufferlist &a
     existing->replacing = true;
     existing->state_offset = 0;
     existing->state = STATE_ACCEPTING_WAIT_CONNECT_MSG;
+    // Discard existing prefetch buffer in `recv_buf`
+    existing->recv_start = existing->recv_end = 0;
     // there should exist any buffer
     assert(recv_start == recv_end);
 
