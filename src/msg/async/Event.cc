@@ -257,16 +257,14 @@ void EventCenter::delete_time_event(uint64_t id)
 
 void EventCenter::wakeup()
 {
-  if (!already_wakeup.read()) {
-    ldout(cct, 1) << __func__ << dendl;
-    char buf[1];
-    buf[0] = 'c';
-    // wake up "event_wait"
-    int n = write(notify_send_fd, buf, 1);
-    // FIXME ?
-    assert(n == 1);
-    already_wakeup.set(1);
-  }
+  ldout(cct, 1) << __func__ << dendl;
+  char buf[1];
+  buf[0] = 'c';
+  // wake up "event_wait"
+  int n = write(notify_send_fd, buf, 1);
+  // FIXME ?
+  assert(n == 1);
+  already_wakeup.set(1);
 }
 
 int EventCenter::process_time_events()
