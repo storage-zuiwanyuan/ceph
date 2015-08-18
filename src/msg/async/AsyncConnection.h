@@ -54,7 +54,7 @@ class AsyncConnection : public Connection {
   // the main usage is avoid error happen outside messenger threads
   int _try_send(bufferlist &bl, bool send=true);
   int _send(Message *m);
-  void prepare_send_message(Message *m, bufferlist &bl);
+  void prepare_send_message(uint64_t features, Message *m, bufferlist &bl);
   int read_until(uint64_t needed, char *p);
   int _process_connection();
   void _connect();
@@ -220,7 +220,7 @@ class AsyncConnection : public Connection {
   int global_seq;
   __u32 connect_seq, peer_global_seq;
   atomic_t out_seq;
-  uint64_t in_seq, in_seq_acked;
+  atomic_t ack_left, in_seq;
   int state;
   int state_after_send;
   int sd;
@@ -228,12 +228,17 @@ class AsyncConnection : public Connection {
   Messenger::Policy policy;
 
   Mutex write_lock;
-  int can_write;  // 0. can't send 1. can send_message 2. connection is closed
+  enum {
+    NOWRITE,
+    CANWRITE,
+    CLOSED
+  } can_write;
   bool open_write;
   map<int, list<pair<bufferlist, Message*> > > out_q;  // priority queue for outbound msgs
-  list<pair<bufferlist, Message*> > sent; // the first bufferlist need to inject seq
+  list<Message*> sent; // the first bufferlist need to inject seq
   list<Message*> local_messages;    // local deliver
   bufferlist outcoming_bl;
+  bool keepalive;
 
   Mutex lock;
   utime_t backoff;         // backoff time
@@ -244,7 +249,6 @@ class AsyncConnection : public Connection {
   EventCallbackRef connect_handler;
   EventCallbackRef local_deliver_handler;
   EventCallbackRef wakeup_handler;
-  bool keepalive;
   struct iovec msgvec[IOV_MAX];
   char *recv_buf;
   uint32_t recv_max_prefetch;
