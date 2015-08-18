@@ -71,12 +71,12 @@ class Worker : public Thread {
     // initialize perf_logger
     PerfCountersBuilder plb(cct, name, l_msgr_first, l_msgr_last);
 
-    plb.add_u64_counter(l_msgr_recv_messages, "msgr_recv_messages", "Network received messages");
-    plb.add_u64_counter(l_msgr_send_messages, "msgr_send_messages", "Network sent messages");
-    plb.add_u64_counter(l_msgr_recv_bytes, "msgr_recv_bytes", "Network received bytes");
-    plb.add_u64_counter(l_msgr_send_bytes, "msgr_send_bytes", "Network received bytes");
-    plb.add_u64_counter(l_msgr_created_connections, "msgr_active_connections", "Active connection number");
-    plb.add_u64_counter(l_msgr_active_connections, "msgr_created_connections", "Created connection number");
+    plb.add_u64_counter(l_msgr_recv_messages, "msgr_recv_messages");
+    plb.add_u64_counter(l_msgr_send_messages, "msgr_send_messages");
+    plb.add_u64_counter(l_msgr_recv_bytes, "msgr_recv_bytes");
+    plb.add_u64_counter(l_msgr_send_bytes, "msgr_send_bytes");
+    plb.add_u64_counter(l_msgr_created_connections, "msgr_active_connections");
+    plb.add_u64_counter(l_msgr_active_connections, "msgr_created_connections");
 
     perf_logger = plb.create_perf_counters();
     cct->get_perfcounters_collection()->add(perf_logger);
