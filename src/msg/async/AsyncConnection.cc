@@ -402,7 +402,7 @@ int AsyncConnection::read_until(uint64_t len, char *p)
       }
       state_offset += r;
       left -= r;
-    } while (r > 0);
+    } while (r > 0 || (r ==0 && errno == EINTR));
   } else {
     do {
       r = read_bulk(sd, recv_buf+recv_end, recv_max_prefetch);
@@ -420,7 +420,7 @@ int AsyncConnection::read_until(uint64_t len, char *p)
         return 0;
       }
       left -= r;
-    } while (r > 0);
+    } while (r > 0 || (r ==0 && errno == EINTR));
     memcpy(p+state_offset, recv_buf, recv_end-recv_start);
     state_offset += (recv_end - recv_start);
     recv_end = recv_start = 0;
