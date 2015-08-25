@@ -46,11 +46,12 @@ class C_handle_notify : public EventCallback {
   C_handle_notify(EventCenter *c): center(c) {}
   void do_request(int fd_or_id) {
     char c[256];
-    int r = 0;
+    int done = 1;
     do {
-      center->already_wakeup.set(0);
-      r = read(fd_or_id, c, sizeof(c));
-    } while (center->already_wakeup.read() || r == sizeof(c));
+      int r = read(fd_or_id, c, sizeof(c));
+      if ((r < 0 && errno == EAGAIN) || r == 0)
+        done = 0;
+    } while (done);
   }
 };
 
@@ -258,14 +259,13 @@ void EventCenter::delete_time_event(uint64_t id)
 
 void EventCenter::wakeup()
 {
-  ldout(cct, 1) << __func__ << dendl;
+  ldout(cct, 10) << __func__ << dendl;
   char buf[1];
   buf[0] = 'c';
   // wake up "event_wait"
   int n = write(notify_send_fd, buf, 1);
   // FIXME ?
   assert(n == 1);
-  already_wakeup.set(1);
 }
 
 int EventCenter::process_time_events()
