@@ -46,7 +46,7 @@ restorecon -R /var/log/ceph > /dev/null 2>&1;
 %endif
 
 # LTTng-UST enabled on Fedora, RHEL 6, and SLES 12
-%if 0%{?fedora} || 0%{?rhel} == 6 || 0%{?suse_version} == 1315
+%if 0%{?fedora} || 0%{?rhel} == 6 || 0%{?rhel} == 7 || 0%{?suse_version} == 1315
 %global _with_lttng 1
 %endif
 
@@ -181,9 +181,13 @@ BuildRequires:	python-argparse
 %endif
 # lttng and babeltrace for rbd-replay-prep
 %if 0%{?_with_lttng}
-%if 0%{?fedora} || 0%{?rhel}
+%if 0%{?fedora} || 0%{?rhel} == 6
 BuildRequires:	lttng-ust-devel
 BuildRequires:	libbabeltrace-devel
+%endif
+%if 0%{?rhel} == 7
+BuildRequires:	lttng-ust-devel
+BuildRequires:	babeltrace-devel
 %endif
 %if 0%{?suse_version}
 BuildRequires:	lttng-ust-devel
@@ -575,6 +579,7 @@ export RPM_OPT_FLAGS=`echo $RPM_OPT_FLAGS | sed -e 's/i386/i486/'`
 %endif
 		--with-jemalloc \
 		--without-tcmalloc \
+		--with-lttng \
 %if 0%{?rhel} || 0%{?fedora}
 		--with-systemd-libexec-dir=/usr/libexec/ceph \
 		--with-rgw-user=root \
